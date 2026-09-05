@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Liftly (rebuild) - Winny</title>
+    <style>
+      body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial; padding: 24px; }
+      header { margin-bottom: 24px }
+      .card { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 12px }
+      input { padding: 8px; font-size: 14px }
+      button { padding: 8px 12px }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Liftly (rebuild)</h1>
+      <p>A minimal scaffold of Liftly rebuilt for Netlify Functions. This is not feature-complete but provides the API surface and local store.json support.</p>
+    </header>
+
+    <section class="card">
+      <h2>Sign up</h2>
+      <input id="su_email" placeholder="email" />
+      <input id="su_password" placeholder="password" type="password" />
+      <button onclick="signup()">Sign up</button>
+      <pre id="su_out"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Login</h2>
+      <input id="li_email" placeholder="email" />
+      <input id="li_password" placeholder="password" type="password" />
+      <button onclick="login()">Login</button>
+      <button onclick="logout()">Logout</button>
+      <pre id="li_out"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Admin → Users</h2>
+      <button onclick="fetchUsers()">Fetch Admin Users</button>
+      <pre id="admin_out"></pre>
+    </section>
+
+    <script>
+      async function signup() {
+        const email = document.getElementById('su_email').value;
+        const password = document.getElementById('su_password').value;
+        const res = await fetch('/api/signup', { method: 'POST', body: JSON.stringify({ email, password }), headers: { 'Content-Type': 'application/json' } });
+        const json = await res.json().catch(()=>({}));
+        document.getElementById('su_out').textContent = JSON.stringify(json, null, 2);
+      }
+      async function login() {
+        const email = document.getElementById('li_email').value;
+        const password = document.getElementById('li_password').value;
+        const res = await fetch('/api/login', { method: 'POST', body: JSON.stringify({ email, password }), headers: { 'Content-Type': 'application/json' } });
+        const json = await res.json().catch(()=>({}));
+        document.getElementById('li_out').textContent = JSON.stringify(json, null, 2);
+      }
+      async function logout() {
+        const res = await fetch('/api/logout');
+        const json = await res.json().catch(()=>({}));
+        document.getElementById('li_out').textContent = JSON.stringify(json, null, 2);
+      }
+      async function fetchUsers() {
+        const res = await fetch('/api/admin_users');
+        const json = await res.json().catch(()=>({}));
+        document.getElementById('admin_out').textContent = JSON.stringify(json, null, 2);
+      }
+    </script>
+  </body>
+</html>
