@@ -7,14 +7,14 @@ exports.handler = async function(event) {
   const apiIndex = parts.findIndex(p => p === 'api');
   const sub = apiIndex >= 0 ? parts.slice(apiIndex + 1) : parts;
 
-  // GET /api/admin/access-requests
-  if (method === 'GET' && sub.length === 3 && sub[0] === 'admin' && sub[1] === 'access-requests') {
+  // GET /api/admin/access-requests -> return array
+  if (method === 'GET' && sub.length >= 2 && sub[0] === 'admin' && sub[1] === 'access-requests') {
     const store = readStore();
-    return { statusCode: 200, body: JSON.stringify({ accessRequests: store.accessRequests || [] }) };
+    return { statusCode: 200, body: JSON.stringify(store.accessRequests || []) };
   }
 
   // POST /api/admin/access-requests/:id
-  if (method === 'POST' && sub.length === 4 && sub[0] === 'admin' && sub[1] === 'access-requests') {
+  if (method === 'POST' && sub.length === 3 && sub[0] === 'admin' && sub[1] === 'access-requests') {
     const id = sub[2];
     let body = {};
     try { body = JSON.parse(event.body); } catch (e) {}

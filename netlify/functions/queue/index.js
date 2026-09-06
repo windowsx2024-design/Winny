@@ -24,7 +24,7 @@ exports.handler = async function(event) {
   // GET /api/queue
   if (event.httpMethod === 'GET' && sub.length === 1 && sub[0] === 'queue') {
     const store = readStore();
-    return { statusCode: 200, body: JSON.stringify({ queue: store.queue || [] }) };
+    return { statusCode: 200, body: JSON.stringify(store.queue || []) };
   }
 
   return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };

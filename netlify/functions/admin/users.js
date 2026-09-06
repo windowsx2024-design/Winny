@@ -3,20 +3,16 @@ const { readStore, writeStore, getSessionIdFromEvent } = require('../utils');
 exports.handler = async function(event) {
   const method = event.httpMethod;
   const path = event.path || '';
-  // Expected paths:
-  // GET /api/admin/users -> list users
-  // POST /api/admin/users/:id/metrics -> update metrics
+  // Normalize path parts
   const parts = path.split('/').filter(Boolean);
-  // parts example: ['.netlify','functions','admin','users'] or '/api/admin/users' -> depending on platform
-  // Normalize by finding '/api' index
   const apiIndex = parts.findIndex(p => p === 'api');
   const sub = apiIndex >= 0 ? parts.slice(apiIndex + 1) : parts;
 
-  // If path ends with 'users' and GET
+  // GET /api/admin/users -> return array of users (no passwordHash)
   if (method === 'GET' && sub.length === 2 && sub[0] === 'admin' && sub[1] === 'users') {
     const store = readStore();
     const safe = (store.users || []).map(u => { const copy = { ...u }; delete copy.passwordHash; return copy; });
-    return { statusCode: 200, body: JSON.stringify({ users: safe }) };
+    return { statusCode: 200, body: JSON.stringify(safe) };
   }
 
   // POST /api/admin/users/:id/metrics
@@ -33,7 +29,8 @@ exports.handler = async function(event) {
       user[field] = value;
     }
     writeStore(store);
-    return { statusCode: 200, body: JSON.stringify({ message: `${user.name}'s performance was updated.`, user }) };
+    const copy = { ...user }; delete copy.passwordHash;
+    return { statusCode: 200, body: JSON.stringify({ message: `${user.name}'s performance was updated.`, user: copy }) };
   }
 
   return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };

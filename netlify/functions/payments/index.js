@@ -6,10 +6,10 @@ exports.handler = async function(event) {
   const apiIndex = parts.findIndex(p => p === 'api');
   const sub = apiIndex >= 0 ? parts.slice(apiIndex + 1) : parts;
 
-  // GET /api/payments/plans
+  // GET /api/payments/plans -> return array
   if (event.httpMethod === 'GET' && sub.length === 2 && sub[0] === 'payments' && sub[1] === 'plans') {
     const store = readStore();
-    return { statusCode: 200, body: JSON.stringify({ plans: store.plans || [] }) };
+    return { statusCode: 200, body: JSON.stringify(store.plans || []) };
   }
 
   // POST /api/payments/checkout
