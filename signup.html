@@ -32,6 +32,20 @@
     </div>
 
     <script>
+      async function safeFetch(url, opts = {}) {
+        opts.credentials = opts.credentials || 'include';
+        if (!opts.headers) opts.headers = {};
+        try {
+          const res = await fetch(url, opts);
+          const contentType = res.headers.get('content-type') || '';
+          if (!res.ok) {
+            try { const json = await res.json(); return { ok:false, status:res.status, detail: json }; } catch(e) { const text = await res.text().catch(()=>null); return { ok:false, status:res.status, detail: text }; }
+          }
+          if (contentType.includes('application/json')) { const json = await res.json(); return { ok:true, json }; }
+          const text = await res.text(); return { ok:true, text };
+        } catch (err) { return { ok:false, detail: err.message } }
+      }
+
       document.getElementById('signupForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const name = document.getElementById('name').value;
@@ -39,15 +53,10 @@
         const password = document.getElementById('password').value;
         const out = document.getElementById('out');
         out.textContent = 'Signing up...';
-        try {
-          const res = await fetch('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) });
-          const json = await res.json();
-          if (!res.ok) { out.textContent = JSON.stringify(json, null, 2); return; }
-          out.textContent = 'Account created — redirecting...';
-          setTimeout(() => location.href = '/', 1000);
-        } catch (err) {
-          out.textContent = 'Request failed: ' + err.message;
-        }
+        const res = await safeFetch('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) });
+        if (!res.ok) { out.textContent = JSON.stringify(res.detail, null, 2); return; }
+        out.textContent = 'Account created — redirecting...';
+        setTimeout(() => location.href = '/', 1000);
       });
     </script>
   </body>

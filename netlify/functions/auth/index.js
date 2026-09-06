@@ -1,15 +1,16 @@
 const { readStore, writeStore } = require('../utils');
 
 exports.handler = async function(event) {
+  // Allow POST with action or legacy subpath
+  let body = {};
+  try { body = JSON.parse(event.body || '{}'); } catch (e) {}
   const path = event.path || '';
   const parts = path.split('/').filter(Boolean);
   const apiIndex = parts.findIndex(p => p === 'api');
   const sub = apiIndex >= 0 ? parts.slice(apiIndex + 1) : parts;
 
-  // POST /api/auth/email
-  if (event.httpMethod === 'POST' && sub.length === 2 && sub[0] === 'auth' && sub[1] === 'email') {
-    let body = {};
-    try { body = JSON.parse(event.body); } catch (e) {}
+  // If body.action is provided, route accordingly
+  if (body && body.action === 'email') {
     const { email } = body;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '')) return { statusCode: 400, body: JSON.stringify({ error: 'Please enter a valid email address.' }) };
     const store = readStore();
@@ -21,14 +22,13 @@ exports.handler = async function(event) {
     return { statusCode: 202, body: JSON.stringify({ message: 'Your access request is waiting for admin approval.' }) };
   }
 
-  // POST /api/auth/provider
-  if (event.httpMethod === 'POST' && sub.length === 2 && sub[0] === 'auth' && sub[1] === 'provider') {
-    let body = {};
-    try { body = JSON.parse(event.body); } catch (e) {}
+  // Legacy provider handling
+  if (body && body.action === 'provider') {
     const { provider } = body;
     if (!['Google','Apple','Facebook','TikTok','X'].includes(provider)) return { statusCode: 400, body: JSON.stringify({ error: 'Unsupported provider.' }) };
     return { statusCode: 501, body: JSON.stringify({ message: `${provider} OAuth needs client credentials. Add them as environment variables before enabling this provider.` }) };
   }
 
+  // If no action provided, return Not Found
   return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
 };
