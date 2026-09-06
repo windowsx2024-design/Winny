@@ -1,23 +1,19 @@
-const { readStore, writeStore } = require('./utils');
+const { readStore, writeStore, getSessionUser } = require('../utils');
 
 exports.handler = async function(event) {
-  const method = event.httpMethod;
-  if (method === 'GET') {
-    const store = readStore();
-    return { statusCode: 200, body: JSON.stringify(store.queue || []) };
-  }
-  if (method === 'POST') {
+  const user = getSessionUser(event);
+  if (!user) return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+  if (event.httpMethod === 'POST') {
     let body = {};
-    try { body = JSON.parse(event.body); } catch (e) {}
-    const { productId } = body;
-    if (!productId) return { statusCode: 400, body: JSON.stringify({ error: 'productId required' }) };
+    try { body = JSON.parse(event.body || '{}'); } catch (e) {}
     const store = readStore();
-    const product = (store.products || []).find(p => p.id === productId);
-    if (!product) return { statusCode: 404, body: JSON.stringify({ error: 'Product not found' }) };
     store.queue = store.queue || [];
-    if (!store.queue.some(item => item.id === product.id)) store.queue.push({ ...product, addedAt: new Date().toISOString() });
+    store.queue.push({ id: body.productId || `q-${Date.now()}`, userId: user.id, addedAt: new Date().toISOString() });
     writeStore(store);
-    return { statusCode: 201, body: JSON.stringify({ message: `${product.title} added to your queue.`, product }) };
+    return { statusCode: 201, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ok: true }) };
   }
-  return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+  // GET
+  const store = readStore();
+  const queue = (store.queue || []).filter(q => q.userId === user.id);
+  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(queue) };
 };

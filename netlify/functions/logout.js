@@ -1,16 +1,13 @@
-const { readStore, writeStore, setCookieHeaders } = require('./utils');
+const { getSessionUser, readStore, writeStore } = require('../utils');
 
 exports.handler = async function(event) {
-  // Clear cookie and remove session
-  const cookieHeader = event.headers && (event.headers.cookie || event.headers.Cookie) || '';
-  const match = cookieHeader.match(/liftly_session=([^;]+)/);
-  const sid = match && match[1];
+  // Logout: clear session cookie
+  const sidHeader = 'Set-Cookie';
+  const cookies = require('../utils').parseCookies(event);
+  const sid = cookies.liftly_session;
   if (sid) {
-    const store = readStore();
-    store.sessions = (store.sessions || []).filter(s => s.id !== sid);
-    writeStore(store);
+    require('../utils').destroySession(sid);
   }
-
-  const cookie = setCookieHeaders('liftly_session', 'deleted', { httpOnly: true, secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 0 });
-  return { statusCode: 200, headers: { 'Set-Cookie': cookie }, body: JSON.stringify({ ok: true }) };
+  const cookie = 'liftly_session=; HttpOnly; Path=/; Max-Age=0';
+  return { statusCode: 200, headers: { [sidHeader]: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ ok: true }) };
 };

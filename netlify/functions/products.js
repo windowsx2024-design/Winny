@@ -1,7 +1,9 @@
-const { readStore } = require('./utils');
+const { readStore, writeStore, getSessionUser } = require('../utils');
 
 exports.handler = async function(event) {
-  if (event.httpMethod !== 'GET') return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+  const user = getSessionUser(event);
+  if (!user) return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
   const store = readStore();
-  return { statusCode: 200, body: JSON.stringify(store.products || []) };
+  const products = store.products || [];
+  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(products) };
 };
