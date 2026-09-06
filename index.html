@@ -26,6 +26,27 @@
       <section id="catalog">
         <h1>Liftly — Product Intelligence</h1>
         <p>Explore products, track trends, and export to Shopify.</p>
+
+        <form id="searchForm">
+          <input id="q" placeholder="Search products" />
+          <button>Search</button>
+        </form>
+
+        <div>
+          <h3>Create product</h3>
+          <form id="createForm">
+            <input name="title" placeholder="Title" required />
+            <input name="price" placeholder="Price" />
+            <textarea name="description" placeholder="Description"></textarea>
+            <button>Create</button>
+          </form>
+        </div>
+
+        <div>
+          <button id="exportCSV">Export CSV</button>
+          <input type="file" id="importCSV" />
+        </div>
+
         <div id="products"></div>
       </section>
 

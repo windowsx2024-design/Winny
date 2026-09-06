@@ -1,3 +1,5 @@
 async function api(path, opts={}){ const res = await fetch('/api/'+path, Object.assign({credentials:'include',headers:{'Content-Type':'application/json'}}, opts)); const text=await res.text(); try{return {status:res.status,ok:res.ok,json:JSON.parse(text)}}catch(e){return{text}} }
+
 async function loadUsers(){ const el=document.getElementById('adminUsers'); el.textContent='Loading...'; const r=await api('admin/users'); if(r.ok && r.json){ el.innerHTML = '<pre>'+JSON.stringify(r.json, null, 2)+'</pre>'; } else { el.textContent = 'Unauthorized or no data: ' + (r.json?.error||r.text||r.status); } }
-loadUsers();
+async function loadMetrics(){ const el=document.getElementById('adminMetrics'); const r = await api('admin/metrics'); if(r.ok && r.json){ el.innerHTML = '<pre>'+JSON.stringify(r.json,null,2)+'</pre>'; } else { el.innerHTML = 'Metrics not available'; } }
+loadUsers(); loadMetrics();
