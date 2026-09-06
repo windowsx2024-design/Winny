@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sign up — Liftly</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body{font-family:Manrope,Arial,sans-serif;padding:48px;background:#fff}
+      .card{max-width:520px;margin:0 auto;border:1px solid #eee;padding:28px;border-radius:10px}
+      label{display:block;margin-bottom:8px;font-size:13px}
+      input{width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:6px}
+      button.primary{background:#1b1930;color:#fff;padding:10px 14px;border-radius:8px;border:0}
+      .note{font-size:13px;color:#666;margin-top:10px}
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Create your account</h2>
+      <p class="note">Sign up to save products, connect Shopify, and track your ad performance.</p>
+      <form id="signupForm">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" placeholder="Your name" />
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@company.com" required />
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Choose a secure password" required />
+        <button class="primary" type="submit">Sign up</button>
+      </form>
+      <pre id="out" style="white-space:pre-wrap;margin-top:12px"></pre>
+      <p class="note">Already have an account? <a href="/">Sign in</a></p>
+    </div>
+
+    <script>
+      document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const out = document.getElementById('out');
+        out.textContent = 'Signing up...';
+        try {
+          const res = await fetch('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) });
+          const json = await res.json();
+          if (!res.ok) { out.textContent = JSON.stringify(json, null, 2); return; }
+          out.textContent = 'Account created — redirecting...';
+          setTimeout(() => location.href = '/', 1000);
+        } catch (err) {
+          out.textContent = 'Request failed: ' + err.message;
+        }
+      });
+    </script>
+  </body>
+</html>
