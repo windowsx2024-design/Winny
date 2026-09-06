@@ -1,38 +1,38 @@
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
-const { readStore, writeStore, setCookieHeaders } = require('./utils');
+const { findUserByEmail, createSession } = require('./data_adapter');
+const { parseCookies, setCookieHeader } = require('./_helpers');
+
+function getCookieFromEvent(event) {
+  const cookies = parseCookies(event);
+  return cookies.liftly_session;
+}
 
 exports.handler = async function(event) {
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   let body = {};
-  try { body = JSON.parse(event.body); } catch (e) {}
-  const { email, password } = body;
+  try { body = JSON.parse(event.body || '{}'); } catch(e) {}
+  const { email, password } = body || {};
   if (!email || !password) return { statusCode: 400, body: JSON.stringify({ error: 'email and password required' }) };
 
-  const store = readStore();
-  store.users = store.users || [];
-  const user = store.users.find(u => u.email === email.toLowerCase() || (process.env.NODE_ENV !== 'production' && email === '='));
-  if (!user) return { statusCode: 401, body: JSON.stringify({ error: 'invalid credentials' }) };
-
-  // if local shortcut '=' map to admin user
-  if (process.env.NODE_ENV !== 'production' && email === '=') {
-    // allow login with any password for the shortcut
-  } else {
-    const ok = bcrypt.compareSync(password, user.passwordHash || '');
-    if (!ok) return { statusCode: 401, body: JSON.stringify({ error: 'invalid credentials' }) };
+  const user = findUserByEmail(email);
+  // local development shortcut
+  if (!user && process.env.NODE_ENV !== 'production' && email === '=') {
+    // Create or find a local admin user 'Norway'
+    // For simplicity, allow login without password only in dev
+    const dummy = { id: 'norway-admin', email: 'admin@local', name: 'Norway', isAdmin: true };
+    const session = createSession(dummy.id);
+    const cookie = setCookieHeader('liftly_session', session.id, { httpOnly: true, secure: false, path: '/', maxAge: 60*60*24*7 });
+    const safe = { id: dummy.id, email: dummy.email, name: dummy.name, isAdmin: true };
+    return { statusCode: 200, headers: { 'Set-Cookie': cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ user: safe }) };
   }
 
-  const sessionId = uuidv4();
-  store.sessions = store.sessions || [];
-  const session = { id: sessionId, userId: user.id, createdAt: new Date().toISOString() };
-  store.sessions.push(session);
-  user.lastActivity = new Date().toISOString();
-  writeStore(store);
+  if (!user) return { statusCode: 401, body: JSON.stringify({ error: 'invalid credentials' }) };
 
-  const cookie = setCookieHeaders('liftly_session', sessionId, { httpOnly: true, secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60 * 60 * 24 * 7 });
+  const ok = bcrypt.compareSync(password || '', user.passwordHash || '');
+  if (!ok) return { statusCode: 401, body: JSON.stringify({ error: 'invalid credentials' }) };
 
-  const responseUser = { ...user };
-  delete responseUser.passwordHash;
-
-  return { statusCode: 200, headers: { 'Set-Cookie': cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ user: responseUser }) };
+  const session = createSession(user.id);
+  const cookie = setCookieHeader('liftly_session', session.id, { httpOnly: true, secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 60*60*24*7 });
+  const safe = { ...user }; delete safe.passwordHash;
+  return { statusCode: 200, headers: { 'Set-Cookie': cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ user: safe }) };
 };

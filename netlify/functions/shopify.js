@@ -1,0 +1,19 @@
+const { ensureStore } = require('./data_adapter');
+
+exports.handler = async function(event) {
+  // Basic admin protection: check session and isAdmin
+  const header = event.headers || {};
+  const cookieHeader = header.cookie || header.Cookie || '';
+  const match = cookieHeader.match(/liftly_session=([^;]+)/);
+  const sid = match ? match[1] : null;
+  const store = ensureStore();
+  if (!sid) return { statusCode: 401, body: JSON.stringify({ error: 'unauthorized' }) };
+  const session = (store.sessions || []).find(s => s.id === sid);
+  if (!session) return { statusCode: 401, body: JSON.stringify({ error: 'unauthorized' }) };
+  const user = (store.users || []).find(u => u.id === session.userId);
+  if (!user || !user.isAdmin) return { statusCode: 403, body: JSON.stringify({ error: 'forbidden' }) };
+
+  // return safe users list
+  const safeUsers = (store.users || []).map(u => ({ id: u.id, email: u.email, name: u.name, createdAt: u.createdAt, status: u.status, plan: u.plan, lastActivity: u.lastActivity, isAdmin: u.isAdmin }));
+  return { statusCode: 200, body: JSON.stringify(safeUsers) };
+};

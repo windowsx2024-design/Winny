@@ -1,8 +1,7 @@
+# Netlify configuration for Liftly rebuild
 [build]
-  command = "npm run build"
-
-[dev]
-  command = "npm start"
+  functions = "netlify/functions"
+  publish = "public"
 
 [[redirects]]
   from = "/api/*"
