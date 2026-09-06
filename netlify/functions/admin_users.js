@@ -1,21 +1,3 @@
-const { parseCookies } = require('./_helpers');
 const { ensureStore } = require('./data_adapter');
 
-function getSessionId(event){
-  const header = event.headers || {};
-  const cookieHeader = header.cookie || header.Cookie || '';
-  const match = cookieHeader.match(/liftly_session=([^;]+)/);
-  return match ? match[1] : null;
-}
-
-exports.handler = async function(event) {
-  const sid = getSessionId(event);
-  if (!sid) return { statusCode: 200, body: JSON.stringify({ user: null }) };
-  const store = ensureStore();
-  const session = (store.sessions || []).find(s => s.id === sid);
-  if (!session) return { statusCode: 200, body: JSON.stringify({ user: null }) };
-  const user = (store.users || []).find(u => u.id === session.userId);
-  if (!user) return { statusCode: 200, body: JSON.stringify({ user: null }) };
-  const safe = { ...user }; delete safe.passwordHash;
-  return { statusCode: 200, body: JSON.stringify({ user: safe }) };
-};
+exports.handler = async function(event){ const header = event.headers || {}; const cookieHeader = header.cookie || header.Cookie || ''; const match = cookieHeader.match(/liftly_session=([^;]+)/); const sid = match ? match[1] : null; const store = ensureStore(); if(!sid) return { statusCode:401, body: JSON.stringify({ error:'unauthorized' }) }; const session = (store.sessions||[]).find(s=>s.id===sid); if(!session) return { statusCode:401, body: JSON.stringify({ error:'unauthorized' }) }; const user = (store.users||[]).find(u=>u.id===session.userId); if(!user || !user.isAdmin) return { statusCode:403, body: JSON.stringify({ error:'forbidden' }) }; const safeUsers = (store.users||[]).map(u=>({ id:u.id, email:u.email, name:u.name, createdAt:u.createdAt, status:u.status, plan:u.plan, lastActivity:u.lastActivity, isAdmin:u.isAdmin })); return { statusCode:200, body: JSON.stringify(safeUsers) }; };

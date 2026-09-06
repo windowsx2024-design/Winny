@@ -1,4 +1,3 @@
-# Netlify configuration for Liftly rebuild
 [build]
   functions = "netlify/functions"
   publish = "public"

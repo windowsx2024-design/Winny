@@ -1,9 +1,3 @@
-const { readStore, writeStore, getSessionUser } = require('../utils');
+const { ensureStore } = require('./data_adapter');
 
-exports.handler = async function(event) {
-  const user = getSessionUser(event);
-  if (!user) return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-  const store = readStore();
-  const products = store.products || [];
-  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(products) };
-};
+exports.handler = async function(event){ const store = ensureStore(); const products = store.products || []; return { statusCode:200, body: JSON.stringify({ products }) }; };

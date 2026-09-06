@@ -3,79 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>Liftly — Discover products that move</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
-    <style>.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);padding:13px 18px;background:#1b1930;color:#fff;border-radius:99px;font:12px Manrope,Arial,sans-serif;box-shadow:0 8px 28px rgba(7,6,9,.18);opacity:0;transition:all .28s ease}.toast.show{transform:translate(-50%,0);opacity:1}</style>
-    <style>.account{padding:90px 0 120px}.account-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:45px}.account-heading h2{font-size:clamp(48px,6vw,83px);margin:17px 0}.nav-buttons{display:flex;gap:9px;align-items:center}.sign-in{border:0;background:transparent;font:600 12px Manrope;color:#1b1930;cursor:pointer;padding:10px}.sign-up{border:0;background:transparent;font:600 12px Manrope;color:#1b1930;cursor:pointer;padding:10px;text-decoration:underline}</style>
   </head>
   <body>
-    <div class="orb orb-one"></div><div class="orb orb-two"></div><div class="grain"></div>
     <main>
       <nav>
-        <a class="brand" href="#"><span>l</span>liftly</a>
-        <div class="nav-links"><a href="#how">How it works</a><a href="#catalog">Catalog</a><a href="#account">My account</a><a href="/admin.html">Admin</a><a href="/payments.html">Billing</a></div>
-        <div class="nav-buttons"><button class="sign-in" id="openLogin">Sign in</button><a class="sign-up" id="openSignup" href="/signup.html">Sign up</a><button class="nav-action" id="navConnect">Connect Shopify <b>↗</b></button></div>
+        <a class="brand" href="/">liftly</a>
+        <div class="nav-links">
+          <a href="#catalog">Catalog</a>
+          <a href="#how">How it works</a>
+          <a href="#account">My account</a>
+          <a href="/admin.html">Admin</a>
+          <a href="/payments.html">Billing</a>
+        </div>
+        <div class="nav-buttons">
+          <button id="openLogin">Sign in</button>
+          <a href="/signup.html" id="navSignup">Sign up</a>
+        </div>
       </nav>
 
-      <section class="hero" id="catalog">
-        <div class="eyebrow"><i></i> Product intelligence, made visual</div>
-        <h1>Find products<br />worth <em>moving.</em></h1>
-        <p class="hero-copy">Explore winning products through real video. Pick a clip, shape your listing, then send it straight to your Shopify store.</p>
-        <div class="hero-actions"><button class="primary" id="startButton">Explore products <span>↓</span></button><button class="text-button" id="watchButton">See how it works <i>▶</i></button></div>
-        <div class="metrics"><div><b>4.8k</b><span>products tracked</span></div><div><b>92%</b><span>listing-ready</span></div><div><b>24h</b><span>trend signal</span></div></div>
-
-        <div class="stage" id="stage">
-          <div class="cursor-note note-one">drag the cards around <span>↗</span></div>
-          <article class="product-card card-a draggable" data-title="Cooling Neck Fan" data-price="24.90" data-tag="Summer pick" data-sales="3,840" data-revenue="$95.6k" data-growth="+126%" data-views="1.2M">
-            <div class="card-image image-fan"><span class="save">♡</span><div class="card-badge">HOT NOW</div></div><div class="card-info"><div><h3>Cooling Neck Fan</h3><p>Gadgets · 12.4k saves</p></div><div class="meta"><span>Avg price</span><b>$24.90</b></div></div>
-          </article>
-          <article class="product-card card-b draggable" data-title="Cloud Slide" data-price="19.50" data-tag="Trending" data-sales="2,210" data-revenue="$43.1k" data-growth="+87%" data-views="1.4M">
-            <div class="card-image image-slide"><span class="save">♡</span><div class="card-badge lilac">VIRAL</div></div><div class="card-info"><div><h3>Cloud Slide</h3><p>Home · 8.2k saves</p></div><div class="meta"><span>Avg price</span><b>$19.50</b></div></div>
-          </article>
-          <article class="product-card card-c draggable selected" data-title="Mini Projector" data-price="68.00" data-tag="Best seller" data-sales="7,290" data-revenue="$495.7k" data-growth="+214%" data-views="9.1M">
-            <div class="card-image image-projector"><span class="save active">♥</span><div class="video-chip">▶&nbsp; 01:04</div></div><div class="card-info"><div><h3>Mini Projector</h3><p>Tech · 32.4k saves</p></div><div class="meta"><span>Avg price</span><b>$68.00</b></div></div>
-          </article>
-          <article class="product-card card-d draggable" data-title="Glow Candle" data-price="28.00" data-tag="Warm mood" data-sales="1,690" data-revenue="$47.3k" data-growth="+63%" data-views="850k">
-            <div class="card-image image-candle"><span class="save">♡</span><div class="card-badge orange">RISING</div></div><div class="card-info"><div><h3>Glow Candle</h3><p>Home · 5.4k saves</p></div><div class="meta"><span>Avg price</span><b>$28.00</b></div></div>
-          </article>
-          <div class="discover-pill">Discover <span>↘</span></div>
-        </div>
+      <section id="catalog">
+        <h1>Liftly — Product Intelligence</h1>
+        <p>Explore products, track trends, and export to Shopify.</p>
+        <div id="products"></div>
       </section>
 
-      <section class="builder" id="how">
-        <div class="builder-intro"><div class="eyebrow"><i></i> The listing studio</div><h2>From video<br />to <em>storefront.</em></h2><p>Bring in a creator clip and turn the momentum into a product listing ready for Shopify.</p></div>
-        <div class="studio">
-          <div class="studio-top"><span class="studio-label">01 / PICK A PRODUCT VIDEO</span><span class="online"><i></i> studio online</span></div>
-          <div class="video-area" id="videoArea">
-            <div class="video-placeholder" id="videoPlaceholder"><div class="play-button">▶</div><h3>Drop in a YouTube link</h3><p>We'll use the video as your product story.</p></div>
-            <iframe id="youtubeFrame" title="Selected YouTube video" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" frameborder="0" style="display:none;width:100%;height:280px"></iframe>
-          </div>
-          <div class="url-row"><input id="youtubeUrl" type="url" placeholder="Paste a YouTube URL (youtube.com/watch?v=...)" /><button id="loadVideo">Load video <span>↗</span></button></div>
-          <p class="input-help" id="inputHelp">Try a YouTube link, then select a product card above to prefill your listing.</p>
-          <div class="listing-preview"><div class="preview-head"><span class="studio-label">02 / PRODUCT LISTING</span><span id="listingStatus">DRAFT</span></div><div class="listing-content"><div id="listingThumb" class="listing-thumb image-projector"></div><div class="listing-info"><h3 id="listingTitle">Mini Projector</h3><p id="listingCopy">Portable projector — ready to turn attention into orders.</p><div class="listing-meta"><b id="listingPrice">$68.00</b><span id="sales">7,290 sales</span></div></div></div>
-          <div class="intel-panel"><div class="preview-head"><span class="studio-label">03 / VIRAL PRODUCT INTEL</span><span class="trend-live"><i></i> LIVE SIGNAL</span></div><div class="intel-stats"><div><b id="revenue">$495.7k</b><span>Revenue</span></div><div><b id="growth">+214%</b><span>Growth</span></div><div><b id="views">9.1M</b><span>Views</span></div></div></div>
-          <div class="studio-actions"><button class="secondary" id="copyListing">Copy product details</button><button class="primary" id="shopifyButton">Send to Shopify <span>↗</span></button></div>
-        </div>
+      <section id="account">
+        <h2>Account</h2>
+        <div id="whoami">Not signed in</div>
+        <button id="btnLogout">Logout</button>
       </section>
 
-      <section class="account" id="account">
-        <div class="account-heading"><div><div class="eyebrow"><i></i> Your seller space</div><h2>See what <em>you</em><br />are moving.</h2></div><div class="account-summary"><span>THIS MONTH</span><b>$9,120</b><span>revenue</span></div></div>
-        <div class="welcome-card"><div class="welcome-mark">✦</div><div><h3>Welcome back, Alex</h3><p>Here’s a simple way to get your next product ready to sell.</p></div><div class="start-step" data-step="video"><b>1</b><span>Attach a video</span></div></div>
-        <div class="account-grid"><div class="sales-board"><div class="board-head"><div><span class="studio-label">STORE PERFORMANCE</span><h3>Northstar Goods</h3></div><button class="period-button">This month</button></div>
-          <aside class="account-side"><div class="payout-card"><span>AVAILABLE PAYOUT</span><b>$2,180.40</b><p>Next payout · Sep 08</p><button class="secondary" id="payoutButton">View payouts ↗</button></div></aside>
-        <div class="source-head"><div><span class="studio-label">ALIEXPRESS / CURATED FOR YOU</span><h3>Ready-to-test products</h3><p>Potential products to import into your research queue.</p></div></div>
-        <div class="source-grid"><article class="source-product"><div class="source-image source-one"><span>ALIEXPRESS</span></div><div class="source-copy"><h4>Magnetic Phone Mount</h4><p>4.8 ★ · 320 reviews</p></div><div class="source-cta"><button class="import-button" data-product="Magnetic Phone Mount">Import</button></div></article></div>
-      </section>
-
-      <section class="closing" id="about"><p>Less searching. More selling.</p><h2>Make the next <em>thing</em><br />your thing.</h2><button class="primary" id="closingStart">Start discovering <span>↘</span></button>
-      <footer><a class="brand" href="#"><span>l</span>liftly</a><span>© 2024 Liftly, Inc.</span><div><a href="#">Instagram</a><a href="#">TikTok</a></div></footer>
     </main>
-    <div class="toast" id="toast"></div>
-    <div class="login-overlay" id="loginOverlay" aria-hidden="true"><section class="login-modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><button class="close-login" id="closeLogin">✕</button><h3 id="loginTitle">Sign in to Liftly</h3><div class="social-row"><button class="social-login" data-provider="Google">Continue with Google</button><button class="social-login" data-provider="Facebook">Continue with Facebook</button></div><div class="divider">or</div><div class="email-login"><input id="emailLogin" type="email" placeholder="you@company.com" /><button class="primary" id="emailLoginButton">Send sign-in link</button></div></section></div>
+
     <script src="app.js"></script>
   </body>
 </html>

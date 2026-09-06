@@ -1,11 +1,10 @@
 {
-  "name": "liftly-rebuild",
-  "version": "0.1.0",
+  "name": "winny-liftly-rebuild",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "netlify dev",
-    "build": "echo \"No build step configured\"",
-    "start": "netlify functions:serve"
+    "start": "netlify dev",
+    "build": "echo 'no build step'"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
