@@ -8,9 +8,9 @@ const initialData = {
   dashboard: { storeName: 'Northstar Goods', netSales: 12480, orders: 186, conversion: 3.8, profit: 4990, payout: 2180.40 },
   queue: [],
   users: [
-    { id: 'alex-chen', name: 'Alex Chen', email: 'alex@northstargoods.com', plan: 'Growth', revenue: 12480, views: 6800000, purchases: 186, status: 'Active' },
-    { id: 'maya-singh', name: 'Maya Singh', email: 'maya@oceanroom.com', plan: 'Starter', revenue: 4360, views: 1200000, purchases: 73, status: 'Active' },
-    { id: 'jordan-lee', name: 'Jordan Lee', email: 'jordan@northmarket.com', plan: 'Growth', revenue: 21890, views: 9100000, purchases: 312, status: 'Active' }
+    { id: 'alex-chen', name: 'Alex Chen', email: 'alex@northstargoods.com', plan: 'Growth', revenue: 12480, views: 6800000, purchases: 186, status: 'Active', passwordHash: '' },
+    { id: 'maya-singh', name: 'Maya Singh', email: 'maya@oceanroom.com', plan: 'Starter', revenue: 4360, views: 1200000, purchases: 73, status: 'Active', passwordHash: '' },
+    { id: 'jordan-lee', name: 'Jordan Lee', email: 'jordan@northmarket.com', plan: 'Growth', revenue: 21890, views: 9100000, purchases: 312, status: 'Active', passwordHash: '' }
   ],
   accessRequests: [
     { id: 'request-sam-rivera', name: 'Sam Rivera', email: 'sam@rivera.store', requestedAt: '2026-09-05T09:30:00.000Z', status: 'pending' }
@@ -23,7 +23,8 @@ const initialData = {
     { id: 'magnetic-phone-mount', title: 'Magnetic Phone Mount', cost: 3.82, rating: 4.8, supplierOrders: '2,000+' },
     { id: 'pet-hair-remover', title: 'Pet Hair Remover', cost: 4.25, rating: 4.9, supplierOrders: '1,000+' },
     { id: 'portable-blender', title: 'Portable Blender', cost: 8.90, rating: 4.7, supplierOrders: '500+' }
-  ]
+  ],
+  sessions: []
 };
 
 function readStore() {
@@ -60,4 +61,49 @@ function setCookieHeaders(name, value, opts = {}) {
   return parts.join('; ');
 }
 
-module.exports = { readStore, writeStore, generateUserId, generateUserCode, setCookieHeaders };
+function parseCookies(event) {
+  const header = (event.headers && (event.headers.cookie || event.headers.Cookie)) || '';
+  const pairs = header.split(';').map(s => s.trim()).filter(Boolean);
+  const out = {};
+  pairs.forEach(p => {
+    const idx = p.indexOf('=');
+    if (idx > -1) {
+      const k = p.slice(0, idx); const v = p.slice(idx + 1);
+      out[k] = v;
+    }
+  });
+  return out;
+}
+
+function getSessionIdFromEvent(event) {
+  const cookies = parseCookies(event);
+  return cookies.liftly_session || null;
+}
+
+function getSessionUser(event) {
+  const sid = getSessionIdFromEvent(event);
+  if (!sid) return null;
+  const store = readStore();
+  const session = (store.sessions || []).find(s => s.id === sid);
+  if (!session) return null;
+  const user = (store.users || []).find(u => u.id === session.userId);
+  if (!user) return null;
+  const safe = { ...user }; delete safe.passwordHash; return safe;
+}
+
+function createSessionForUser(userId) {
+  const sid = uuidv4();
+  const store = readStore();
+  store.sessions = store.sessions || [];
+  store.sessions.push({ id: sid, userId, createdAt: new Date().toISOString() });
+  writeStore(store);
+  return sid;
+}
+
+function destroySession(sid) {
+  const store = readStore();
+  store.sessions = (store.sessions || []).filter(s => s.id !== sid);
+  writeStore(store);
+}
+
+module.exports = { readStore, writeStore, generateUserId, generateUserCode, setCookieHeaders, parseCookies, getSessionIdFromEvent, getSessionUser, createSessionForUser, destroySession };
